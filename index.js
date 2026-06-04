@@ -99,6 +99,19 @@
       }
     }
 
+    function playFoundSound() {
+      try {
+        // Put your local sound file in the project folder (same level as index.html)
+        // and set this filename to match exactly.
+        const audio = new Audio("sound.mp3"); // e.g. "alert.wav" / "beep.ogg"
+        audio.volume = 1.0;
+        audio.play().catch(() => {});
+      } catch (e) {
+        console.warn("Audio playback failed:", e);
+      }
+    }
+
+
     async function showPosition(position) {
       const { latitude, longitude, accuracy } = position.coords;
       const lat = formatNumber(latitude);
@@ -120,10 +133,16 @@
 
       setStatus("success", "Location found", "Success! Your exact location and coordinates were retrieved from the browser Geolocation API.");
       updatePermissionMessage();
+      playFoundSound();
     }
+
+
+
+
 
     function showLocationError(error) {
       resetLocationDisplay();
+
 
       if (error.code === error.PERMISSION_DENIED) {
         setStatus("error", "Permission denied", "Location permission was denied. Allow location access in your browser settings, then try again.");
