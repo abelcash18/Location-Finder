@@ -4,6 +4,9 @@
     const statusText = document.getElementById("statusText");
     const permissionText = document.getElementById("permissionText");
     const addressEl = document.getElementById("address");
+    const cityEl = document.getElementById("city");
+    const stateEl = document.getElementById("state");
+    const countryEl = document.getElementById("country");
     const latitudeEl = document.getElementById("latitude");
     const longitudeEl = document.getElementById("longitude");
     const accuracyEl = document.getElementById("accuracy");
@@ -30,6 +33,9 @@
 
     function resetLocationDisplay() {
       addressEl.textContent = "—";
+      cityEl.textContent = "—";
+      stateEl.textContent = "—";
+      countryEl.textContent = "—";
       latitudeEl.textContent = "—";
       longitudeEl.textContent = "—";
       accuracyEl.textContent = "—";
@@ -46,10 +52,28 @@
         );
         if (!response.ok) throw new Error("Failed to fetch address");
         const data = await response.json();
-        return data.address?.road || data.address?.village || data.address?.town || data.address?.city || data.display_name.split(",")[0] || "Location found";
+
+        const address =
+          data.address?.road ||
+          data.address?.village ||
+          data.address?.town ||
+          data.address?.city ||
+          data.display_name?.split(",")?.[0] ||
+          "Location found";
+
+        const city = data.address?.city || data.address?.town || data.address?.village || data.address?.hamlet || "—";
+        const state =
+          data.address?.state ||
+          data.address?.region ||
+          data.address?.province ||
+          data.address?.county ||
+          "—";
+        const country = data.address?.country || "—";
+
+        return { address, city, state, country };
       } catch (error) {
         console.error("Geocoding error:", error);
-        return "Address not available";
+        return { address: "Address not available", city: "—", state: "—", country: "—" };
       }
     }
 
@@ -80,10 +104,13 @@
       const lat = formatNumber(latitude);
       const lon = formatNumber(longitude);
       const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
-      const address = await getAddressFromCoordinates(latitude, longitude);
+      const { address, city, state, country } = await getAddressFromCoordinates(latitude, longitude);
 
       lastCoordinates = { latitude: lat, longitude: lon, mapsUrl };
       addressEl.textContent = address;
+      cityEl.textContent = city || "—";
+      stateEl.textContent = state || "—";
+      countryEl.textContent = country || "—";
       latitudeEl.textContent = lat;
       longitudeEl.textContent = lon;
       accuracyEl.textContent = accuracy ? `${Math.round(accuracy)} meters` : "Not provided";
